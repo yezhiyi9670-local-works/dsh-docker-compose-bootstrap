@@ -9,9 +9,12 @@ services:
       - /tmp:noexec,nosuid,size=1G
       - /usr/local/lib/node_modules/.cache:nosuid,size=500M
     user: "node"
+    privileged: false
     cap_drop:
       - ALL
     security_opt:
+      - apparmor:unconfined
+      - seccomp:unconfined
       - no-new-privileges:true
     deploy:
       resources:
