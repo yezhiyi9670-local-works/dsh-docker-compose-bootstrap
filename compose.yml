@@ -1,0 +1,62 @@
+services:
+
+  inbounds_proxy:
+    image: nginx:alpine
+    ports:
+      - "127.0.0.1:3080:80"
+    volumes:
+      - ./inbounds/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - ai_net
+      - external_net
+    depends_on:
+      - dsh
+
+  outbounds_proxy:
+    image: sameersbn/squid:latest
+    volumes:
+      - ./outbounds/squid.conf:/etc/squid/squid.conf:ro
+    networks:
+      - ai_net
+      - external_net
+
+  dsh:
+    build:
+      context: .
+      target: start
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=1G
+      - /usr/local/lib/node_modules/.cache,nosuid,size=500M
+    user: "node"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          pids: 256
+          cpus: 2
+          memory: 4G
+    networks:
+      - ai_net
+    depends_on:
+      - outbounds_proxy
+    ports:
+      - '127.0.0.1:3080:3081'
+    volumes:
+      - ./.dsh:/home/node/.dsh:rw   # Data directory
+    environment:
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+      - HTTP_PROXY=http://proxy:3128
+      - HTTPS_PROXY=http://proxy:3128
+      - NO_PROXY=localhost,127.0.0.1
+
+networks:
+  ai_net:
+    # Agent has NO direct internet
+    internal: true
+  external_net:
+    # Default bridge - proxy can reach the internet
+    driver: 'bridge'
