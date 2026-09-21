@@ -27,7 +27,7 @@ services:
     read_only: true
     tmpfs:
       - /tmp:noexec,nosuid,size=1G
-      - /usr/local/lib/node_modules/.cache,nosuid,size=500M
+      - /usr/local/lib/node_modules/.cache:nosuid,size=500M
     user: "node"
     cap_drop:
       - ALL
@@ -45,10 +45,11 @@ services:
       - outbounds_proxy
     volumes:
       - ./.dsh:/home/node/.dsh:rw   # Data directory
+      - ${HOME1}/global_agent_workspace:/home/node/global_agent_workspace:rw
     environment:
       - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
-      - HTTP_PROXY=http://proxy:3128
-      - HTTPS_PROXY=http://proxy:3128
+      - HTTP_PROXY=http://outbounds_proxy:3128
+      - HTTPS_PROXY=http://outbounds_proxy:3128
       - NO_PROXY=localhost,127.0.0.1
 
 networks:
