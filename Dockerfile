@@ -24,8 +24,8 @@ FROM extra_utils AS profile_setup
 FROM profile_setup AS start
 
 USER node
-# https://github.com/deepseek-ai/deepseek-harness/discussions/3494
-# CMD ["dsh", "--profile", "web", "--port", "3080", "--no-open"]
+# Needs in-container proxy: DSH currently hard-rejects `--host 0.0.0.0`
+# Needs `--expose-internals`: https://github.com/deepseek-ai/deepseek-harness/discussions/3494
 CMD [ \
     "sh", "-c", \
     " \

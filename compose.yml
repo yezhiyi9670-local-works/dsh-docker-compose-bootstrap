@@ -43,8 +43,6 @@ services:
       - ai_net
     depends_on:
       - outbounds_proxy
-    ports:
-      - '127.0.0.1:3080:3081'
     volumes:
       - ./.dsh:/home/node/.dsh:rw   # Data directory
     environment:
