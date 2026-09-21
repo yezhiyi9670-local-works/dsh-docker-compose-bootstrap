@@ -12,6 +12,8 @@ WORKDIR /dsh/workdir
 RUN apt-get update
 RUN apt-get install -y curl
 RUN apt-get install -y socat
+RUN apt-get install -y ripgrep
+RUN apt-get install -y bubblewrap
 
 FROM setup AS install
 
