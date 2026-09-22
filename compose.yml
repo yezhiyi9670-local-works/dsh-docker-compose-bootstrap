@@ -35,6 +35,8 @@ services:
       - HTTP_PROXY=http://outbounds_proxy:3128
       - HTTPS_PROXY=http://outbounds_proxy:3128
       - NO_PROXY=localhost,127.0.0.1
+      - LANG=C.UTF-8
+      - LC_ALL=C.UTF-8
 
   inbounds_proxy:
     image: nginx:alpine
