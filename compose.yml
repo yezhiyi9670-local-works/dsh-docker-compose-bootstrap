@@ -69,8 +69,10 @@ services:
       - /etc/squid:noexec,nosuid,size=1M
     command: ["sh", "/root/entrypoint.sh"]
     networks:
-      - ai_net
-      - external_net
+      ai_net:
+        # Fixed address so pinchtab can accurately trust this proxy address.
+        ipv4_address: 172.16.0.80
+      external_net: {}
 
   srv_dns:
     image: coredns/coredns:1.14.7
