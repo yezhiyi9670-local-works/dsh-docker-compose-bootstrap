@@ -19,7 +19,7 @@ services:
     deploy:
       resources:
         limits:
-          pids: 256
+          pids: 512
           cpus: 2
           memory: 4G
     networks:
@@ -50,7 +50,11 @@ services:
   outbounds_proxy:
     image: sameersbn/squid:latest
     volumes:
-      - ./outbounds/squid.conf:/etc/squid/squid.conf:ro
+      - ./outbounds/squid.conf:/root/squid.conf:ro
+      - ./outbounds/entrypoint.sh:/root/entrypoint.sh:ro
+    tmpfs:
+      - /etc/squid:noexec,nosuid,size=1M
+    command: ["sh", "/root/entrypoint.sh"]
     networks:
       - ai_net
       - external_net
