@@ -27,6 +27,8 @@ services:
       # Data directory (chown 1000 and chmod 0700 in docker WSL distro first)
       - ./persist/agent/.dsh:/home/node/.dsh:rw
       - ./persist/agent/.pinchtab:/home/node/.pinchtab:rw
+      - ./persist/agent/.config:/home/node/.config:rw
+      - ./persist/agent/.local:/home/node/.local:rw
       - ./persist/agent/.cache:/home/node/.cache:rw
       - ${HOME1}/global_agent_workspace:/home/node/global_agent_workspace:rw
     tmpfs:
