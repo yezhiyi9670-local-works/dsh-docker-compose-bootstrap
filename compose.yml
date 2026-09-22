@@ -21,8 +21,13 @@ services:
           memory: 4G
     networks:
       - ai_net
+    dns:
+      # PinchTab's navigation preflight resolves hostnames itself; ai_net is
+      # internal, so point it at the forwarding resolver on ai_net.
+      - 172.16.0.53
     depends_on:
       - srv_outbounds
+      - srv_dns
     volumes:
       # Data directory (chown 1000 and chmod 0700 in docker WSL distro first)
       - ./persist/srv_agent/.dsh:/home/node/.dsh:rw
@@ -67,10 +72,26 @@ services:
       - ai_net
       - external_net
 
+  srv_dns:
+    image: coredns/coredns:1.14.7
+    command: ["-conf", "/etc/coredns/Corefile"]
+    volumes:
+      - ./srv_dns/Corefile:/etc/coredns/Corefile:ro
+    networks:
+      ai_net:
+        # Fixed address so srv_agent can name it in `dns:` (Docker's dns
+        # option takes an address, not a service name).
+        ipv4_address: 172.16.0.53
+      external_net: {}
+
 networks:
   ai_net:
     # Agent has NO direct internet
     internal: true
+    ipam:
+      config:
+        # Pinned so srv_dns gets a predictable address on the internal net.
+        - subnet: 172.16.0.0/24
   external_net:
     # Default bridge - proxy can reach the internet
     driver: 'bridge'

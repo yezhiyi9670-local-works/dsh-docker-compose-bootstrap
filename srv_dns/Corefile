@@ -1,0 +1,17 @@
+# =============================================================================
+# CoreDNS Configuration for DeepSeek Harness Sandbox
+# =============================================================================
+# A minimal forwarding-only resolver. It sits on ai_net (where srv_agent can
+# reach it) and on external_net (so it can reach the host's resolvers through
+# Docker's embedded DNS). This is what lets PinchTab's navigation DNS preflight
+# resolve hostnames even though srv_agent itself has no external network access.
+
+.:53 {
+    errors
+    log
+    cache 30
+
+    # Inherit whatever Docker hands this container (the host's resolvers),
+    # instead of hardcoding public resolvers here.
+    forward . /etc/resolv.conf
+}
