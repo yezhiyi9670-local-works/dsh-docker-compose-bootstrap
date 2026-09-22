@@ -11,6 +11,7 @@ WORKDIR /dsh/workdir
 
 RUN apt-get update
 RUN apt-get install -y chromium
+RUN apt-get install -y --no-install-recommends fonts-noto-cjk fonts-noto-color-emoji && fc-cache -fv
 RUN apt-get install -y curl
 RUN apt-get install -y socat
 RUN apt-get install -y ripgrep
@@ -18,7 +19,7 @@ RUN apt-get install -y bubblewrap
 
 FROM setup AS install
 
-RUN npm install --global @deepseek-ai/dsh@0.1.5-rc.2
+RUN npm install --global @deepseek-ai/dsh@0.1.5-rc.2 --before 2026-09-22T00:00:00+00:00
 
 FROM install AS start
 

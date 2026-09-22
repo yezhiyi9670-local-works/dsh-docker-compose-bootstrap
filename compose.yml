@@ -5,9 +5,6 @@ services:
       context: .
       target: start
     read_only: true
-    tmpfs:
-      - /tmp:noexec,nosuid,size=1G
-      - /usr/local/lib/node_modules/.cache:nosuid,size=500M
     user: "node"
     privileged: false
     cap_drop:
@@ -27,10 +24,13 @@ services:
     depends_on:
       - outbounds_proxy
     volumes:
-      - ./data:/home/node/data:rw   # Data directory
+      - ./persist/.dsh:/home/node/.dsh:rw      # Data directory (chown 1000 and chmod 0700 in docker WSL distro first)
+      - ./persist/.cache:/home/node/.cache:rw  # Common cache directory (chown 1000 in docker WSL distro first)
       - ${HOME1}/global_agent_workspace:/home/node/global_agent_workspace:rw
+    tmpfs:
+      - /tmp:noexec,nosuid,size=1G
+      - /usr/local/lib/node_modules/.cache:nosuid,size=500M
     environment:
-      - DSH_HOME=/home/node/data/dsh
       - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
       - HTTP_PROXY=http://outbounds_proxy:3128
       - HTTPS_PROXY=http://outbounds_proxy:3128
