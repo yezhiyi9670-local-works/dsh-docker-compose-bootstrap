@@ -35,7 +35,9 @@ services:
       - ./persist/srv_agent/.config:/home/node/.config:rw
       - ./persist/srv_agent/.local:/home/node/.local:rw
       - ./persist/srv_agent/.cache:/home/node/.cache:rw
+      # Workspaces
       - ${HOME1}/global_agent_workspace:/home/node/global_agent_workspace:rw
+      - ${HOME1}/global_agent_workspace/.git:/home/node/global_agent_workspace/.git:ro
     tmpfs:
       - /tmp:noexec,nosuid,size=1G
       - /usr/local/lib/node_modules/.cache:nosuid,size=500M
