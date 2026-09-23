@@ -35,9 +35,14 @@ services:
       - ./persist/srv_agent/.config:/home/node/.config:rw
       - ./persist/srv_agent/.local:/home/node/.local:rw
       - ./persist/srv_agent/.cache:/home/node/.cache:rw
-      # Workspaces
+      # Workspace: Global
       - ${HOME1}/global_agent_workspace:/home/node/global_agent_workspace:rw
       - ${HOME1}/global_agent_workspace/.git:/home/node/global_agent_workspace/.git:ro
+      # Workspace: OC Sandbox
+      - ${OPENCODE_DISTRO_HOME}/dev/opencode:/home/node/projects/opencode/opencode:ro
+      - ${OPENCODE_DISTRO_HOME}/dev/opencode_plugins/opencode-sandbox-plugin:/home/node/projects/opencode/opencode-sandbox-plugin:ro
+      - ${OPENCODE_DISTRO_HOME}/dev/opencode_plugins/opencode-sandbox-new:/home/node/projects/opencode/opencode-sandbox-new:rw
+      - ${OPENCODE_DISTRO_HOME}/dev/opencode_plugins/opencode-sandbox-new/.git:/home/node/projects/opencode/opencode-sandbox-new/.git:ro
     tmpfs:
       - /tmp:noexec,nosuid,size=1G
       - /usr/local/lib/node_modules/.cache:nosuid,size=500M
