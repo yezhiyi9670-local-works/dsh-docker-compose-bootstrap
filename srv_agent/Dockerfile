@@ -19,12 +19,13 @@ RUN apt-get install -y git
 
 FROM setup AS install
 
+# Bun (for development)
+RUN npm install --global bun
+
 # Pinchtab
 RUN npm install --global pinchtab@0.15.2
 
-# Using time travel due to 0.1.5-rc.3 version breakage:
-# https://github.com/deepseek-ai/deepseek-harness/discussions/7500
-RUN npm install --global @deepseek-ai/dsh@0.1.5-rc.2 --before 2026-09-22T00:00:00+00:00
+RUN npm install --global @deepseek-ai/dsh@0.1.5-rc.3
 
 FROM install AS start
 
