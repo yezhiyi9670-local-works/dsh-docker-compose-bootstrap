@@ -1,0 +1,8 @@
+function addPrivDirs({ addRoMount, addRwMount, addRwWithRoGit }) {
+  const HOME = String.raw`C:\Users\Administrator`
+
+  // Global
+  addRwWithRoGit(`${HOME}/global_agent_workspace`, '/home/node/global_agent_workspace')
+}
+
+module.exports = { addPrivDirs }
