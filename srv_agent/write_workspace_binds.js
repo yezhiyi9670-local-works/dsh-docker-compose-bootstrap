@@ -46,6 +46,9 @@ function addRwMount(hostPath, containerPath) {
 function addRwWithRoGit(hostPath, containerPath) {
   addMount(hostPath, containerPath, 'rw')
   addMount(hostPath + '/.git', containerPath + '/.git', 'ro')
+  if(fs.existsSync(resolveEnvedPath(hostPath + '/.git/lfs/tmp'))) {
+    addMount(hostPath + '/.git/lfs/tmp', containerPath + '/.git/lfs/tmp', 'rw')
+  }
 }
 function finish() {
   // Standard JSON is also YML

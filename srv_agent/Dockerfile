@@ -15,7 +15,7 @@ RUN apt-get install -y socat
 RUN apt-get install -y ripgrep
 RUN apt-get install -y bubblewrap
 
-RUN apt-get install -y git
+RUN apt-get install -y git git-lfs
 
 FROM setup AS install
 
@@ -25,7 +25,12 @@ RUN npm install --global bun
 # Pinchtab
 RUN npm install --global pinchtab@0.15.2
 
+# DSH
 RUN npm install --global @deepseek-ai/dsh@0.1.5-rc.3
+
+# Config
+RUN git config --global core.autocrlf input
+RUN git lfs install
 
 FROM install AS start
 
