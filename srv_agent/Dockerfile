@@ -26,13 +26,21 @@ RUN npm install --global bun
 RUN npm install --global pinchtab@0.15.2
 
 # DSH
-RUN npm install --global @deepseek-ai/dsh@0.1.5-rc.3
+RUN npm install --global @deepseek-ai/dsh@0.1.7-rc.2
 
 # Config
 RUN git config --global core.autocrlf input
 RUN git lfs install
 
 FROM install AS postconfig
+
+# About the NARB_DISABLE_NATIVE_CACHE=1 flag:
+#   In 0.1.7, `--expose-internals` no longer skip the loading of `node-addon-require-builtin`.
+#   `node-addon-require-builtin` native binary is by default copied into `/tmp` and then executed.
+#   Since our `/tmp` may be `noexec`, disable this behavior to prevent startup failure.
+#   FIXME: `node-addon-require-builtin` package is currently closed-source without adequate
+#          documentation or auditing materials. Re-check when appropriate.
+ENV NARB_DISABLE_NATIVE_CACHE=1
 
 RUN mkdir -p /app/source
 RUN mkdir -p /app/workdir
@@ -45,14 +53,14 @@ ENV TZ=Europe/London
 
 FROM postconfig AS start
 
-# Needs in-container proxy: DSH currently hard-rejects `--host 0.0.0.0`
-# Needs `--expose-internals`: https://github.com/deepseek-ai/deepseek-harness/discussions/3494
+# About in-container proxy:
+#   DSH currently hard-rejects `--host 0.0.0.0`
 CMD [ \
     "sh", "-c", \
     " \
         dsh --profile web --dump-config; \
         socat TCP-LISTEN:3081,fork,reuseaddr,bind=0.0.0.0 TCP:127.0.0.1:3080 & \
         yes | pinchtab server --bind 0.0.0.0 --port 3082  & \
-        node --expose-internals \"$(which dsh)\" --profile web --host 127.0.0.1 --port 3080 --no-open \
+        dsh --profile web --host 127.0.0.1 --port 3080 --no-open \
     " \
 ]
