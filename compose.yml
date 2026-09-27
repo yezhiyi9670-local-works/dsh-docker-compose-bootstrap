@@ -4,6 +4,7 @@ include:
 services:
 
   srv_agent:
+    restart: unless-stopped
     build:
       context: srv_agent
       target: start
@@ -51,6 +52,7 @@ services:
       - TZ=Asia/Shanghai
 
   srv_inbounds:
+    restart: unless-stopped
     image: nginx:1.31.6-alpine3.24-slim
     ports:
       - "127.0.0.1:3080:80"
@@ -64,6 +66,7 @@ services:
       - srv_agent
 
   srv_outbounds:
+    restart: unless-stopped
     image: sameersbn/squid:3.5.27-2
     volumes:
       - ./srv_outbounds/squid.conf:/root/squid.conf:ro
@@ -78,6 +81,7 @@ services:
       external_net: {}
 
   srv_dns:
+    restart: unless-stopped
     image: coredns/coredns:1.14.7
     command: ["-conf", "/etc/coredns/Corefile"]
     volumes:
