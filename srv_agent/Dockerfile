@@ -9,7 +9,7 @@ RUN apt-get update
 
 RUN apt-get install -y chromium
 RUN apt-get install -y --no-install-recommends fonts-noto-cjk fonts-noto-color-emoji && fc-cache -fv
-
+RUN apt-get install -y locales locales-all
 RUN apt-get install -y curl
 RUN apt-get install -y socat
 RUN apt-get install -y ripgrep
@@ -32,12 +32,19 @@ RUN npm install --global @deepseek-ai/dsh@0.1.5-rc.3
 RUN git config --global core.autocrlf input
 RUN git lfs install
 
-FROM install AS start
+FROM install AS postconfig
 
 RUN mkdir -p /app/source
 RUN mkdir -p /app/workdir
 WORKDIR /app/workdir
 USER node
+
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
+ENV TZ=Europe/London
+
+FROM postconfig AS start
+
 # Needs in-container proxy: DSH currently hard-rejects `--host 0.0.0.0`
 # Needs `--expose-internals`: https://github.com/deepseek-ai/deepseek-harness/discussions/3494
 CMD [ \

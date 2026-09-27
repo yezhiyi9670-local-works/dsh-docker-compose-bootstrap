@@ -46,8 +46,9 @@ services:
       - HTTP_PROXY=http://srv_outbounds:3128
       - HTTPS_PROXY=http://srv_outbounds:3128
       - NO_PROXY=localhost,127.0.0.1
-      - LANG=C.UTF-8
-      - LC_ALL=C.UTF-8
+      - LANG=zh_CN.UTF-8
+      - LC_ALL=zh_CN.UTF-8
+      - TZ=Asia/Shanghai
 
   srv_inbounds:
     image: nginx:1.31.6-alpine3.24-slim
