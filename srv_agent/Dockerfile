@@ -53,6 +53,6 @@ CMD [ \
         dsh --profile web --dump-config; \
         socat TCP-LISTEN:3081,fork,reuseaddr,bind=0.0.0.0 TCP:127.0.0.1:3080 & \
         yes | pinchtab server --bind 0.0.0.0 --port 3082  & \
-        node --expose-internals /usr/local/lib/node_modules/@deepseek-ai/dsh/lib/bin.js --profile web --host 127.0.0.1 --port 3080 --no-open \
+        node --expose-internals \"$(which dsh)\" --profile web --host 127.0.0.1 --port 3080 --no-open \
     " \
 ]
