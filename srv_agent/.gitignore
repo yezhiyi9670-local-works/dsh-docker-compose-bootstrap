@@ -1,2 +1,3 @@
-/derived
+/derived/*
+!/derived/.placeholder
 /priv_workspace_dirs.js
