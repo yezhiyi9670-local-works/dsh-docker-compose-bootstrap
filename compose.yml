@@ -71,6 +71,7 @@ services:
     image: sameersbn/squid:3.5.27-2
     volumes:
       - ./srv_outbounds/squid.conf:/root/squid.conf:ro
+      - ./srv_outbounds/squid-extra:/etc/squid-extra:ro
       - ./srv_outbounds/entrypoint.sh:/root/entrypoint.sh:ro
     tmpfs:
       - /etc/squid:noexec,nosuid,size=1M

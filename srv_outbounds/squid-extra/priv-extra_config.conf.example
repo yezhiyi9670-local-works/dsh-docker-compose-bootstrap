@@ -1,0 +1,6 @@
+# Proxy chaining, if you need
+# cache_peer host.docker.internal parent 8089 0 no-query default
+# never_direct allow all
+
+# Extra ACL entries
+# acl Host_extra_ports port 1145

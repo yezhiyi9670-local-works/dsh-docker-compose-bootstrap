@@ -1,7 +1,7 @@
 const fs = require('fs')
 const process = require('process')
 
-const { addPrivDirs } = require('./priv_workspace_dirs.js')
+const { addPrivDirs } = require('./priv-workspace_dirs.js')
 
 const mountList = []
 
