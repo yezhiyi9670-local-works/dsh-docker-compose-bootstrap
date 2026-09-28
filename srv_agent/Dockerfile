@@ -61,6 +61,6 @@ CMD [ \
         dsh --profile web --dump-config; \
         socat TCP-LISTEN:3081,fork,reuseaddr,bind=0.0.0.0 TCP:127.0.0.1:3080 & \
         yes | pinchtab server --bind 0.0.0.0 --port 3082  & \
-        dsh --profile web --host 127.0.0.1 --port 3080 --no-open \
+        dsh --profile web --host 127.0.0.1 --port 3080 --no-open $DSH_EXTRA_ARGS \
     " \
 ]
