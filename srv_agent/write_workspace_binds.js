@@ -3,6 +3,7 @@ const process = require('process')
 
 const { addPrivDirs } = require('./priv-workspace_dirs.js')
 
+const tmpfsList = []
 const mountList = []
 
 function resolveEnvedPath(path) {
@@ -10,9 +11,28 @@ function resolveEnvedPath(path) {
     return process.env[key] ?? ''
   })
 }
+function addTmpfs(containerPath, opts) {
+  if(!containerPath) {
+    throw new Error('addTmpfs: Container path must not be empty.')
+  }
+  if(
+    containerPath.indexOf(':') != -1 ||
+    (opts && opts.indexOf(':') != -1)
+  ) {
+    throw new Error('No part can contain `:`, except for Windows host drive letter.')
+  }
+  if(!containerPath.startsWith('/home/node/')) {
+    throw new Error('Container mount path should start with home directory `/home/node`. Found: ' + containerPath)
+  }
+  
+  tmpfsList.push(
+    containerPath +
+    (opts ? ':' + opts : '')
+  )
+}
 function addMount(hostPath, containerPath, opts) {
   if(!hostPath || !containerPath) {
-    throw new Error('Host and container path must not be empty.')
+    throw new Error('addMount: Host and container path must not be empty.')
   }
   if(
     !(
@@ -37,6 +57,12 @@ function addMount(hostPath, containerPath, opts) {
     (opts ? ':' + opts : '')
   )
 }
+function addRoTmpfs(containerPath) {
+  addTmpfs(containerPath, 'ro')
+}
+function addRwTmpfs(containerPath) {
+  addTmpfs(containerPath, 'rw')
+}
 function addRoMount(hostPath, containerPath) {
   addMount(hostPath, containerPath, 'ro')
 }
@@ -55,11 +81,12 @@ function finish() {
   fs.writeFileSync(__dirname + '/derived/workspace_binds.yml', JSON.stringify({
     services: {
       srv_agent: {
+        tmpfs: tmpfsList,
         volumes: mountList
       }
     }
   }, null, '  '))
 }
 
-addPrivDirs({ addRoMount, addRwMount, addRwWithRoGit })
+addPrivDirs({ addRoTmpfs, addRwTmpfs, addRoMount, addRwMount, addRwWithRoGit })
 finish()

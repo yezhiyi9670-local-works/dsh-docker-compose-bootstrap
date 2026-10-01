@@ -1,4 +1,4 @@
-function addPrivDirs({ addRoMount, addRwMount, addRwWithRoGit }) {
+function addPrivDirs({ addRoTmpfs, addRwTmpfs, addRoMount, addRwMount, addRwWithRoGit }) {
   const HOME = String.raw`C:\Users\Administrator`
 
   // Global
