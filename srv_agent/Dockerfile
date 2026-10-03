@@ -10,7 +10,7 @@ RUN apt-get update
 RUN apt-get install -y chromium
 RUN apt-get install -y --no-install-recommends fonts-noto-cjk fonts-noto-color-emoji && fc-cache -fv
 RUN apt-get install -y locales locales-all
-RUN apt-get install -y curl
+RUN apt-get install -y curl dnsutils
 RUN apt-get install -y socat
 RUN apt-get install -y ripgrep
 RUN apt-get install -y bubblewrap

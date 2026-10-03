@@ -11,7 +11,9 @@
     log
     cache 30
 
-    # Inherit whatever Docker hands this container (the host's resolvers),
-    # instead of hardcoding public resolvers here.
-    forward . /etc/resolv.conf
+    forward . 1.1.1.1 8.8.8.8 /etc/resolv.conf {
+        # 'sequential' ensures it tries the first upstream, and only moves to 
+        # the next one if the first one times out or fails to connect.
+        policy sequential
+    }
 }
