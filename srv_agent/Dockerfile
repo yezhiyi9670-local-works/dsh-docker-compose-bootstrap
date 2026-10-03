@@ -26,7 +26,7 @@ RUN npm install --global bun
 RUN npm install --global pinchtab@0.15.2
 
 # DSH
-RUN npm install --global @deepseek-ai/dsh@0.1.7-rc.2
+RUN npm install --global @deepseek-ai/dsh@0.2.0-rc.2
 
 # Config
 RUN git config --global core.autocrlf input
