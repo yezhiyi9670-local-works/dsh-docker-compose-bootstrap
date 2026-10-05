@@ -55,12 +55,15 @@ FROM postconfig AS start
 
 # About in-container proxy:
 #   DSH currently hard-rejects `--host 0.0.0.0`
+# MCP:
+#   PinchTab: `pinchtab mcp --agent-id dsh --server http://127.0.0.1:3082` (to main)
+#             `pinchtab mcp --agent-id dsh --server http://127.0.0.1:9868` (to instance 0, more stable)
 CMD [ \
     "sh", "-c", \
     " \
         dsh --profile web --dump-config; \
         socat TCP-LISTEN:3081,fork,reuseaddr,bind=0.0.0.0 TCP:127.0.0.1:3080 & \
-        yes | pinchtab server --bind 0.0.0.0 --port 3082  & \
+        yes | pinchtab server --bind 0.0.0.0 --port 3082 & \
         dsh --profile web --host 127.0.0.1 --port 3080 --no-open $DSH_EXTRA_ARGS \
     " \
 ]
