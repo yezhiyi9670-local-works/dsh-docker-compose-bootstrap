@@ -46,8 +46,11 @@ services:
       - DSH_EXTRA_ARGS=${DSH_EXTRA_ARGS}
       - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
       - HTTP_PROXY=http://srv_outbounds:3128
+      - http_proxy=http://srv_outbounds:3128
       - HTTPS_PROXY=http://srv_outbounds:3128
+      - https_proxy=http://srv_outbounds:3128
       - NO_PROXY=localhost,127.0.0.1
+      - no_proxy=localhost,127.0.0.1
       - LANG=zh_CN.UTF-8
       - LC_ALL=zh_CN.UTF-8
       - TZ=Asia/Shanghai
