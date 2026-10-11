@@ -1,8 +1,47 @@
-function addPrivDirs({ addRoTmpfs, addRwTmpfs, addRoMount, addRwMount, addRwWithRoGit }) {
-  const HOME = String.raw`C:\Users\Administrator`
+'use strict';
 
-  // Global
-  addRwWithRoGit(`${HOME}/global_agent_workspace`, '/home/node/global_agent_workspace')
+const fs = require('fs')
+function addPrivDirs({ hostPathExists, addRoTmpfs, addRwTmpfs, addRoMount, addRwMount, addRwWithRoGit, setupConventionalWorkspace }) {
+  const HOME0 = String.raw`C:\Users\Administrator`
+  
+  const AGENT_GENERAL = `${HOME0}/agent_general`
+  const CONVENTIONAL_SHARED_DOCS = `${AGENT_GENERAL}/shared_docs`
+  const CONVENTIONAL_SHARED_TEMP = `${HOME0}/agent_temp/shared_temp`
+  const WS_PARENT = '/home/node/workspaces'
+
+  function setupConventional(wsRoot) {
+    setupConventionalWorkspace(wsRoot, CONVENTIONAL_SHARED_DOCS, true, CONVENTIONAL_SHARED_TEMP)
+  }
+
+  // General 
+  ;(() => {
+    const hostBase = AGENT_GENERAL
+    const wsRoot = `${WS_PARENT}/general`
+    setupConventional(wsRoot)
+
+    addRoMount(`${hostBase}/workflow`, `${wsRoot}/workflow`)
+    for(const workflow of fs.readdirSync(`${hostBase}/workflow`)) {
+      if(!fs.existsSync(`${hostBase}/workflow/${workflow}/prompt`)) {
+        continue
+      }
+      console.log('Found general workflow folder: ' + workflow)
+      addRwMount(
+        `${hostBase}/workflow/${workflow}`,
+        `${wsRoot}/workflow/${workflow}`
+      )
+      addRoMount(
+        `${hostBase}/workflow/${workflow}/prompt`,
+        `${wsRoot}/workflow/${workflow}/prompt`
+      )
+    }
+
+    for(const project of []) {
+      addRwWithRoGit(`${hostBase}/${project}`, `${wsRoot}/${project}`)
+    }
+    for(const project of []) {
+      addRoMount(`${hostBase}/${project}`, `${wsRoot}/${project}`)
+    }
+  })()
 }
 
 module.exports = { addPrivDirs }

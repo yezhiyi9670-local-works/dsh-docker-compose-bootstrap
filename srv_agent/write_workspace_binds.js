@@ -1,5 +1,9 @@
+'use strict';
+
 const fs = require('fs')
 const process = require('process')
+// Relative path is relative to `derived` folder.
+process.chdir(__dirname + '/derived')
 
 const { addPrivDirs } = require('./priv-workspace_dirs.js')
 
@@ -10,6 +14,9 @@ function resolveEnvedPath(path) {
   return path.replace(/\$\{([A-Za-z0-9\-_]+)\}/g, (match, key) => {
     return process.env[key] ?? ''
   })
+}
+function hostPathExists(hostPath) {
+  return fs.existsSync(resolveEnvedPath(hostPath))
 }
 function addTmpfs(containerPath, opts) {
   if(!containerPath) {
@@ -22,7 +29,7 @@ function addTmpfs(containerPath, opts) {
     throw new Error('No part can contain `:`, except for Windows host drive letter.')
   }
   if(!containerPath.startsWith('/home/node/')) {
-    throw new Error('Container mount path should start with home directory `/home/node`. Found: ' + containerPath)
+    throw new Error('Container mount path should start with home directory `/home/node`. Offender: ' + containerPath)
   }
   
   tmpfsList.push(
@@ -45,11 +52,11 @@ function addMount(hostPath, containerPath, opts) {
     throw new Error('No part can contain `:`, except for Windows host drive letter.')
   }
   if(!containerPath.startsWith('/home/node/')) {
-    throw new Error('Container mount path should start with home directory `/home/node`. Found: ' + containerPath)
+    throw new Error('Container mount path should start with home directory `/home/node`. Offender: ' + containerPath)
   }
   const resolvedHostPath = resolveEnvedPath(hostPath)
   if(!fs.existsSync(resolvedHostPath)) {
-    throw new Error('Host workspace path must be existent. Found: ' + hostPath)
+    throw new Error('Host workspace path must be existent. Offender: ' + resolvedHostPath)
   }
 
   mountList.push(
@@ -76,6 +83,24 @@ function addRwWithRoGit(hostPath, containerPath) {
     addMount(hostPath + '/.git/lfs/tmp', containerPath + '/.git/lfs/tmp', 'rw')
   }
 }
+function setupConventionalWorkspace(containerWsRoot, hostSharedDocsPath, sharedDocWritable, hostSharedTempPath) {
+  // AGENTS.md: Relative path is relative to `derived` folder
+  addRoMount('../conventional_workspace.AGENTS.md', containerWsRoot + '/AGENTS.md')
+  // workspace-resident tmpfs
+  addRwTmpfs(containerWsRoot + '/tmpfs')
+  // shared_docs
+  if(hostSharedDocsPath) {
+    if(sharedDocWritable) {
+      addRwWithRoGit(hostSharedDocsPath, containerWsRoot + '/shared_docs')
+    } else {
+      addRoMount(hostSharedDocsPath, containerWsRoot + '/shared_docs')
+    }
+  }
+  // shared_temp
+  if(hostSharedTempPath) {
+    addRwMount(hostSharedTempPath, containerWsRoot + '/shared_temp')
+  }
+}
 function finish() {
   // Standard JSON is also YML
   fs.writeFileSync(__dirname + '/derived/workspace_binds.yml', JSON.stringify({
@@ -88,5 +113,5 @@ function finish() {
   }, null, '  '))
 }
 
-addPrivDirs({ addRoTmpfs, addRwTmpfs, addRoMount, addRwMount, addRwWithRoGit })
+addPrivDirs({ hostPathExists, addRoTmpfs, addRwTmpfs, addRoMount, addRwMount, addRwWithRoGit, setupConventionalWorkspace })
 finish()
