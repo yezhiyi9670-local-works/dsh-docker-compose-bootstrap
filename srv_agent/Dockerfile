@@ -14,6 +14,7 @@ RUN apt-get install -y curl dnsutils
 RUN apt-get install -y socat
 RUN apt-get install -y ripgrep
 RUN apt-get install -y bubblewrap
+RUN apt-get install -y golang-go
 
 RUN apt-get install -y git git-lfs
 
