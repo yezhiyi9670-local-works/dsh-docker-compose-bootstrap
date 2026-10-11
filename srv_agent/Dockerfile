@@ -30,8 +30,8 @@ RUN npm install --global pinchtab@0.15.2
 RUN npm install --global @deepseek-ai/dsh@0.2.0-rc.2
 
 # Config
-RUN git config --global core.autocrlf input
 RUN git lfs install
+RUN su -c "git config --global core.autocrlf input" node
 
 FROM install AS postconfig
 
