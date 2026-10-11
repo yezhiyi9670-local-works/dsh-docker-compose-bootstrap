@@ -84,6 +84,8 @@ function addRwWithRoGit(hostPath, containerPath) {
   }
 }
 function setupConventionalWorkspace(containerWsRoot, hostSharedDocsPath, sharedDocWritable, hostSharedTempPath) {
+  // Root as ro tmpfs
+  addRoTmpfs(containerWsRoot)
   // AGENTS.md: Relative path is relative to `derived` folder
   addRoMount('../conventional_workspace.AGENTS.md', containerWsRoot + '/AGENTS.md')
   // workspace-resident tmpfs
