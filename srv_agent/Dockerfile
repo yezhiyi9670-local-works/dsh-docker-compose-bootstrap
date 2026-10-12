@@ -17,6 +17,7 @@ RUN apt-get install -y bubblewrap
 RUN apt-get install -y golang-go
 
 RUN apt-get install -y git git-lfs
+RUN apt-get install -y python-is-python3
 
 FROM setup AS install
 
