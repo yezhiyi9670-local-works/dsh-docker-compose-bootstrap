@@ -77,6 +77,10 @@ CMD [ \
     "sh", "-c", \
     " \
         dsh --profile web --dump-config; \
+        echo 'WARNING: DSH is patched so that remote devices accessing this DSH will also persist'; \
+        echo '         settings to server-side.'; \
+        echo '         This is fully intentional to avoid breaking plugins that rely on settings.'; \
+        echo '         Do not expose your installation to networks or devices you do not trust.'; \
         socat TCP-LISTEN:3081,fork,reuseaddr,bind=0.0.0.0 TCP:127.0.0.1:3080 & \
         yes | pinchtab server --bind 0.0.0.0 --port 3082 & \
         dsh --profile web --host 127.0.0.1 --port 3080 --no-open $DSH_EXTRA_ARGS \
