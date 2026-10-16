@@ -7,8 +7,7 @@ process.chdir(__dirname + '/derived')
 
 const { addPrivDirs } = require('./priv-workspace_dirs.js')
 
-const tmpfsList = []
-const mountList = []
+const volumesList = []
 
 function resolveEnvedPath(path) {
   return path.replace(/\$\{([A-Za-z0-9\-_]+)\}/g, (match, key) => {
@@ -18,38 +17,23 @@ function resolveEnvedPath(path) {
 function hostPathExists(hostPath) {
   return fs.existsSync(resolveEnvedPath(hostPath))
 }
-function addTmpfs(containerPath, opts) {
+function addTmpfs(containerPath, extras) {
   if(!containerPath) {
     throw new Error('addTmpfs: Container path must not be empty.')
-  }
-  if(
-    containerPath.indexOf(':') != -1 ||
-    (opts && opts.indexOf(':') != -1)
-  ) {
-    throw new Error('No part can contain `:`, except for Windows host drive letter.')
   }
   if(!containerPath.startsWith('/home/node/')) {
     throw new Error('Container mount path should start with home directory `/home/node`. Offender: ' + containerPath)
   }
   
-  tmpfsList.push(
-    containerPath +
-    (opts ? ':' + opts : '')
-  )
+  volumesList.push({
+    type: 'tmpfs',
+    target: containerPath,
+    ...extras
+  })
 }
-function addMount(hostPath, containerPath, opts) {
+function addMount(hostPath, containerPath, extras) {
   if(!hostPath || !containerPath) {
     throw new Error('addMount: Host and container path must not be empty.')
-  }
-  if(
-    !(
-      hostPath.indexOf(':') == -1 ||
-      /[A-Za-z]:[\\/][^:]*/.test(hostPath)
-    ) ||
-    containerPath.indexOf(':') != -1 ||
-    (opts && opts.indexOf(':') != -1)
-  ) {
-    throw new Error('No part can contain `:`, except for Windows host drive letter.')
   }
   if(!containerPath.startsWith('/home/node/')) {
     throw new Error('Container mount path should start with home directory `/home/node`. Offender: ' + containerPath)
@@ -59,28 +43,34 @@ function addMount(hostPath, containerPath, opts) {
     throw new Error('Host workspace path must be existent. Offender: ' + resolvedHostPath)
   }
 
-  mountList.push(
-    hostPath + ':' + containerPath +
-    (opts ? ':' + opts : '')
-  )
+  volumesList.push({
+    type: 'bind',
+    source: hostPath,
+    target: containerPath,
+    ...extras,
+    bind: {
+      create_host_path: false,
+      ...extras['bind']
+    }
+  })
 }
 function addRoTmpfs(containerPath) {
-  addTmpfs(containerPath, 'ro')
+  addTmpfs(containerPath, { read_only: true })
 }
 function addRwTmpfs(containerPath) {
-  addTmpfs(containerPath, 'rw')
+  addTmpfs(containerPath, { read_only: false })
 }
 function addRoMount(hostPath, containerPath) {
-  addMount(hostPath, containerPath, 'ro')
+  addMount(hostPath, containerPath, { read_only: true })
 }
 function addRwMount(hostPath, containerPath) {
-  addMount(hostPath, containerPath, 'rw')
+  addMount(hostPath, containerPath, { read_only: false })
 }
 function addRwWithRoGit(hostPath, containerPath) {
-  addMount(hostPath, containerPath, 'rw')
-  addMount(hostPath + '/.git', containerPath + '/.git', 'ro')
+  addMount(hostPath, containerPath, { read_only: false })
+  addMount(hostPath + '/.git', containerPath + '/.git', { read_only: true })
   if(fs.existsSync(resolveEnvedPath(hostPath + '/.git/lfs/tmp'))) {
-    addMount(hostPath + '/.git/lfs/tmp', containerPath + '/.git/lfs/tmp', 'rw')
+    addMount(hostPath + '/.git/lfs/tmp', containerPath + '/.git/lfs/tmp', { read_only: false })
   }
 }
 function setupConventionalWorkspace(containerWsRoot, hostSharedDocsPath, sharedDocWritable, hostSharedTempPath) {
@@ -108,8 +98,7 @@ function finish() {
   fs.writeFileSync(__dirname + '/derived/workspace_binds.yml', JSON.stringify({
     services: {
       srv_agent: {
-        tmpfs: tmpfsList,
-        volumes: mountList
+        volumes: volumesList
       }
     }
   }, null, '  '))
