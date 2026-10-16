@@ -33,7 +33,7 @@ services:
       - srv_outbounds
       - srv_dns
     volumes:
-      # Data directory (chown 1000 and chmod 0700 in docker WSL distro first)
+      # Data directories (ensure owner 1000 in WSL docker-desktop distro)
       - ./persist/srv_agent/.dsh:/home/node/.dsh:rw
       - ./persist/srv_agent/.pinchtab:/home/node/.pinchtab:rw
       - ./persist/srv_agent/.config:/home/node/.config:rw

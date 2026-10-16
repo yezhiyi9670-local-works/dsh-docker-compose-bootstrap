@@ -21,6 +21,9 @@ RUN apt-get install -y python-is-python3
 
 FROM setup AS install
 
+RUN mkdir -p /app/source
+RUN mkdir -p /app/workdir
+
 # Bun (for development)
 RUN npm install --global bun
 
@@ -29,6 +32,18 @@ RUN npm install --global pinchtab@0.15.2
 
 # DSH
 RUN npm install --global @deepseek-ai/dsh@0.2.0-rc.2
+
+# Allow Host-backed settings for trusted non-loopback Web clients (LAN / proxy / tunnel).
+# Fails the build if the bundle is not the expected package/version or the source drifted.
+# This does not change server-side security boundary - the removed restriction is purely client-side.
+COPY patch-settings-persistence.mjs /app/source/patch-settings-persistence.mjs
+RUN set -eux; \
+    target="$(npm root -g)/@deepseek-ai/dsh/node_modules/@deepseek-ai/dsh-client-ui-settings/lib/client.js"; \
+    DSH_SETTINGS_CLIENT_VERSION="0.2.0-rc.2" \
+      node /app/source/patch-settings-persistence.mjs "$target"; \
+    node --check "$target"; \
+    ! grep -Fq 'isLoopback ? "host" : "memory"' "$target"; \
+    grep -Fq 'const persistence = "host";' "$target"
 
 # Config
 RUN git lfs install
@@ -44,8 +59,6 @@ FROM install AS postconfig
 #          documentation or auditing materials. Re-check when appropriate.
 ENV NARB_DISABLE_NATIVE_CACHE=1
 
-RUN mkdir -p /app/source
-RUN mkdir -p /app/workdir
 WORKDIR /app/workdir
 USER node
 
