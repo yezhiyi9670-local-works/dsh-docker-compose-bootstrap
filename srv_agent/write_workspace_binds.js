@@ -8,6 +8,8 @@ process.chdir(__dirname + '/derived')
 const { addPrivDirs } = require('./priv-workspace_dirs.js')
 
 const volumesList = []
+const dockerWslRoot = `\\\\wsl$\\docker-desktop\\`
+const wslAutomountBase = `${dockerWslRoot}mnt/host/`
 
 function resolveEnvedPath(path) {
   return path.replace(/\$\{([A-Za-z0-9\-_]+)\}/g, (match, key) => {
@@ -41,6 +43,10 @@ function addMount(hostPath, containerPath, extras) {
   const resolvedHostPath = resolveEnvedPath(hostPath)
   if(!fs.existsSync(resolvedHostPath)) {
     throw new Error('Host workspace path must be existent. Offender: ' + resolvedHostPath)
+  }
+
+  if(hostPath.startsWith(dockerWslRoot)) {
+    hostPath = '/' + hostPath.substring(dockerWslRoot.length)
   }
 
   volumesList.push({
@@ -104,5 +110,5 @@ function finish() {
   }, null, '  '))
 }
 
-addPrivDirs({ hostPathExists, addRoTmpfs, addRwTmpfs, addRoMount, addRwMount, addRwWithRoGit, setupConventionalWorkspace })
+addPrivDirs({ wslAutomountBase, hostPathExists, addRoTmpfs, addRwTmpfs, addRoMount, addRwMount, addRwWithRoGit, setupConventionalWorkspace })
 finish()

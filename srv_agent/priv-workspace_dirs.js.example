@@ -1,7 +1,7 @@
 'use strict';
 
 const fs = require('fs')
-function addPrivDirs({ hostPathExists, addRoTmpfs, addRwTmpfs, addRoMount, addRwMount, addRwWithRoGit, setupConventionalWorkspace }) {
+function addPrivDirs({ wslAutomountBase, hostPathExists, addRoTmpfs, addRwTmpfs, addRoMount, addRwMount, addRwWithRoGit, setupConventionalWorkspace }) {
   const HOME0 = String.raw`C:\Users\Administrator`
   
   const AGENT_GENERAL = `${HOME0}/agent_general`
