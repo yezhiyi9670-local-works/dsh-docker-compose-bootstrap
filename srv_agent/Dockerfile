@@ -31,19 +31,7 @@ RUN npm install --global bun
 RUN npm install --global pinchtab@0.15.2
 
 # DSH
-RUN npm install --global @deepseek-ai/dsh@0.2.0-rc.2
-
-# Allow Host-backed settings for trusted non-loopback Web clients (LAN / proxy / tunnel).
-# Fails the build if the bundle is not the expected package/version or the source drifted.
-# This does not change server-side security boundary - the removed restriction is purely client-side.
-COPY patch-settings-persistence.mjs /app/source/patch-settings-persistence.mjs
-RUN set -eux; \
-    target="$(npm root -g)/@deepseek-ai/dsh/node_modules/@deepseek-ai/dsh-client-ui-settings/lib/client.js"; \
-    DSH_SETTINGS_CLIENT_VERSION="0.2.0-rc.2" \
-      node /app/source/patch-settings-persistence.mjs "$target"; \
-    node --check "$target"; \
-    ! grep -Fq 'isLoopback ? "host" : "memory"' "$target"; \
-    grep -Fq 'const persistence = "host";' "$target"
+RUN npm install --global @deepseek-ai/dsh@0.2.1-rc.2
 
 # Config
 RUN git lfs install
@@ -77,10 +65,6 @@ CMD [ \
     "sh", "-c", \
     " \
         dsh --profile web --dump-config; \
-        echo 'WARNING: DSH is patched so that remote devices accessing this DSH will also persist'; \
-        echo '         settings to server-side.'; \
-        echo '         This is fully intentional to avoid breaking plugins that rely on settings.'; \
-        echo '         Do not expose your installation to networks or devices you do not trust.'; \
         socat TCP-LISTEN:3081,fork,reuseaddr,bind=0.0.0.0 TCP:127.0.0.1:3080 & \
         yes | pinchtab server --bind 0.0.0.0 --port 3082 & \
         dsh --profile web --host 127.0.0.1 --port 3080 --no-open $DSH_EXTRA_ARGS \
