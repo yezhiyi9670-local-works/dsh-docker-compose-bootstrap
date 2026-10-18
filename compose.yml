@@ -29,6 +29,7 @@ services:
       # PinchTab's navigation preflight resolves hostnames itself; ai_net is
       # internal, so point it at the forwarding resolver on ai_net.
       - 172.16.0.53
+      - fd00:1:2:3::53
     depends_on:
       - srv_outbounds
       - srv_dns
