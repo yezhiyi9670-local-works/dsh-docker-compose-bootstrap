@@ -11,6 +11,12 @@
     log
     cache 30
 
+    hosts {
+        198.18.0.1   host.docker.internal  # Fake IP for host
+        
+        fallthrough
+    }
+
     forward . 1.1.1.1 8.8.8.8 /etc/resolv.conf {
         # 'sequential' ensures it tries the first upstream, and only moves to 
         # the next one if the first one times out or fails to connect.
