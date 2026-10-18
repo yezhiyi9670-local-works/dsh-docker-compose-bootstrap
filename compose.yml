@@ -83,6 +83,7 @@ services:
       ai_net:
         # Fixed address so pinchtab can accurately trust this proxy address.
         ipv4_address: 172.16.0.80
+        ipv6_address: fd00:1:2:3::80
       external_net: {}
 
   srv_dns:
@@ -96,16 +97,20 @@ services:
         # Fixed address so srv_agent can name it in `dns:` (Docker's dns
         # option takes an address, not a service name).
         ipv4_address: 172.16.0.53
+        ipv6_address: fd00:1:2:3::53
       external_net: {}
 
 networks:
   ai_net:
     # Agent has NO direct internet
     internal: true
+    enable_ipv6: true
     ipam:
       config:
         # Pinned so srv_dns gets a predictable address on the internal net.
         - subnet: 172.16.0.0/24
+        - subnet: fd00:1:2:3::/64
   external_net:
     # Default bridge - proxy can reach the internet
     driver: 'bridge'
+    enable_ipv6: true

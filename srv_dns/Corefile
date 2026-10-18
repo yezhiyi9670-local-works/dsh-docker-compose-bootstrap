@@ -12,7 +12,11 @@
     cache 30
 
     hosts {
-        198.18.0.1   host.docker.internal  # Fake IP for host
+        # FIXME: The fake IPs are truly fake now (only intended to bypass SSRF checks).
+        #        Outbounds proxy does not rewrite them to the actual address.
+        #        This causes no problems with PinchTab, but might cause problems will some other tools.
+        198.18.0.1          host.docker.internal  # Fake IP for host
+        fdfe:dcba:9876::1   host.docker.internal  # IPv6 fake IP for host
         
         fallthrough
     }
