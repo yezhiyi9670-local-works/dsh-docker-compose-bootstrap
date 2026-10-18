@@ -84,7 +84,7 @@ services:
     command: ["sh", "/root/entrypoint.sh"]
     networks:
       ai_net:
-        # Fixed address so pinchtab can accurately trust this proxy address.
+        # Fixed address so pinchtab can be accurately configured to trust this proxy address.
         ipv4_address: 172.16.0.80
         ipv6_address: fd00:1:2:3::80
       external_net: {}
