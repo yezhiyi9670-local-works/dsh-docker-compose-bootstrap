@@ -1,37 +1,47 @@
 
 FROM node:22-bookworm-slim AS base
 
-RUN npm install --global pnpm
+RUN --mount=type=cache,target=/root/.npm,id=npm-node22 \
+    npm install --global pnpm@12.14.0
 
 FROM base AS setup
 
-RUN apt-get update
+RUN --mount=type=cache,target=/var/cache/apt,id=apt-debian-bookworm,sharing=locked \
+    apt-get update && apt-get install -y \
+    fonts-noto-cjk fonts-noto-color-emoji \
+    chromium \
+    && true
 
-RUN apt-get install -y chromium
-RUN apt-get install -y --no-install-recommends fonts-noto-cjk fonts-noto-color-emoji && fc-cache -fv
-RUN apt-get install -y locales locales-all
-RUN apt-get install -y curl dnsutils
-RUN apt-get install -y socat
-RUN apt-get install -y ripgrep
-RUN apt-get install -y bubblewrap
-RUN apt-get install -y golang-go
+RUN --mount=type=cache,target=/var/cache/apt,id=apt-debian-bookworm,sharing=locked \
+    apt-get update && apt-get install -y \
+    locales locales-all \
+    curl dnsutils \
+    socat ripgrep bubblewrap \
+    git git-lfs \
+    && true
 
-RUN apt-get install -y git git-lfs
-RUN apt-get install -y python-is-python3
+RUN --mount=type=cache,target=/var/cache/apt,id=apt-debian-bookworm,sharing=locked \
+    apt-get update && apt-get install -y \
+    golang-go \
+    python-is-python3 \
+    && true
+
+# Prevent any installation after this point
+RUN rm -rf /var/lib/apt/lists/*
+
+RUN fc-cache -fv
 
 FROM setup AS install
 
 RUN mkdir -p /app/source
 RUN mkdir -p /app/workdir
 
-# Bun (for development)
-RUN npm install --global bun
-
-# Pinchtab
-RUN npm install --global pinchtab@0.15.2
-
-# DSH
-RUN npm install --global @deepseek-ai/dsh@0.2.1-rc.2
+RUN --mount=type=cache,target=/root/.npm,id=npm-node22 \
+    npm install --global \
+    bun@1.4.3 \
+    pinchtab@0.15.2 \
+    @deepseek-ai/dsh@0.2.1-rc.2 \
+    && true
 
 # Config
 RUN git lfs install
