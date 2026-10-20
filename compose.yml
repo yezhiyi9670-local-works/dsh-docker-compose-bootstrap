@@ -43,9 +43,10 @@ services:
     tmpfs:
       - /tmp:noexec,nosuid,size=1G
       - /usr/local/lib/node_modules/.cache:nosuid,size=500M
+    env_file:
+      - ./srv_agent/.env
     environment:
       - DSH_EXTRA_ARGS=${DSH_EXTRA_ARGS}
-      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
       - HTTP_PROXY=http://srv_outbounds:3128
       - http_proxy=http://srv_outbounds:3128
       - HTTPS_PROXY=http://srv_outbounds:3128

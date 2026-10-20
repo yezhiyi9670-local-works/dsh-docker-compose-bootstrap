@@ -1,3 +1,4 @@
+/.env
 /derived/*
 !/derived/.placeholder
 /priv-workspace_dirs.js
