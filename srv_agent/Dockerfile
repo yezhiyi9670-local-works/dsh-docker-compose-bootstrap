@@ -1,21 +1,23 @@
 
 FROM node:22-bookworm-slim AS base
 
-RUN --mount=type=cache,target=/root/.npm \
-    npm install --global pnpm@12.14.0
-
 FROM base AS setup
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get update && apt-get install -y \
     fonts-noto-cjk fonts-noto-color-emoji \
+    && true
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update && apt-get install --no-install-recommends -y \
     chromium \
     && true
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && apt-get install -y \
+    apt-get update && apt-get install --no-install-recommends -y \
     locales locales-all \
     curl dnsutils \
     socat ripgrep bubblewrap \
@@ -24,31 +26,43 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && apt-get install -y \
+    apt-get update && apt-get install --no-install-recommends -y \
     wget apt-transport-https gnupg unzip \
     && true
-
+    
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    echo "deb http://deb.debian.org/debian sid main" >> /etc/apt/sources.list && \
-    apt-get update && \
-    apt-get install -y openjdk-21-jdk-headless && \
-    sed -i '/sid/d' /etc/apt/sources.list && \
-    apt-get update
-
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && apt-get install -y \
+    apt-get update && apt-get install --no-install-recommends -y \
     golang-go \
     python-is-python3 \
+    python3-venv \
+    nano \
+    libmagic-dev \
     && true
 
-# Prevent any installation after this point
+# JDK21
+ADD "https://packages.adoptium.net/artifactory/api/gpg/key/public" /tmp/adoptium_key
+RUN cat /tmp/adoptium_key | gpg --dearmor -o /etc/apt/trusted.gpg.d/adoptium.gpg && \
+    echo "deb https://packages.adoptium.net/artifactory/deb bookworm main" > /etc/apt/sources.list.d/adoptium.list
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update && \
+    apt-get install --no-install-recommends -y temurin-21-jdk
+
+# Prevent any apt installation after this point
 RUN rm -rf /var/lib/apt/lists/*
+
+# Note: DSH needs pnpm
+RUN --mount=type=cache,target=/root/.npm \
+    npm install --global \
+    bun@1.4.3 \
+    pnpm@12.14.0 \
+    && true
 
 # REA base tools setup
 ARG REA_TOOLS=/opt/rea-tools
 RUN mkdir -p "${REA_TOOLS}"
+RUN python -m venv "${REA_TOOLS}/venv"
 
 # Ghidra (for reverse engineering)
 ARG GHIDRA_VERSION=12.1.4
@@ -59,12 +73,57 @@ ADD --checksum=${GHIDRA_CHECKSUM} \
     /tmp/ghidra.zip
 RUN \
     unzip -q /tmp/ghidra.zip -d /tmp/ghidra \
-    && mv "/tmp/ghidra/ghidra_${GHIDRA_VERSION}_PUBLIC" ${REA_TOOLS}/ghidra \
+    && mv "/tmp/ghidra/ghidra_${GHIDRA_VERSION}_PUBLIC" "${REA_TOOLS}/ghidra" \
     && rm -rf /tmp/ghidra \
-    && chmod +x ${REA_TOOLS}/ghidra/support/analyzeHeadless \
-    && find ${REA_TOOLS}/ghidra -name decompile -type f -exec chmod +x {} + \
-    && test -f ${REA_TOOLS}/ghidra/Ghidra/application.properties
+    && chmod +x "${REA_TOOLS}/ghidra/support/analyzeHeadless" \
+    && find "${REA_TOOLS}/ghidra" -name decompile -type f -exec chmod +x {} + \
+    && test -f "${REA_TOOLS}/ghidra/Ghidra/application.properties"
 ENV GHIDRA_INSTALL_DIR="${REA_TOOLS}/ghidra"
+
+# Some heavy npm packages
+RUN --mount=type=cache,target=/root/.npm \
+    npm install --global \
+    pinchtab@0.15.2 \
+    rea-agents@6.7.0 \
+    && true
+
+# JADX (for reverse engineering)
+ARG JADX_MCP_VERSION=0.7.1
+ARG JADX_MCP_CHECKSUM=sha256:6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75
+ADD --checksum=${JADX_MCP_CHECKSUM} \
+    "https://github.com/1013503897/jadx-headless-mcp/releases/download/v${JADX_MCP_VERSION}/jadx-headless-mcp-${JADX_MCP_VERSION}-all.jar" \
+    /tmp/jadx-headless-mcp.jar
+RUN \
+    mkdir -p "${REA_TOOLS}/jadx" \
+    && mv /tmp/jadx-headless-mcp.jar "${REA_TOOLS}/jadx/jadx-headless-mcp.jar" \
+    && chmod 0755 "${REA_TOOLS}/jadx/jadx-headless-mcp.jar"
+ENV REA_JADX_MCP_JAR="${REA_TOOLS}/jadx/jadx-headless-mcp.jar"
+
+# apktool (for reverse engineering)
+ARG APKTOOL_VERSION=3.0.3
+ARG APKTOOL_CHECKSUM=sha256:dbf930b076c6b9be08d57c449cacefc3bdd6b71ebd59b3066fc0e1f5b14f9423
+ADD --checksum=${APKTOOL_CHECKSUM} \
+    "https://github.com/iBotPeaches/Apktool/releases/download/v${APKTOOL_VERSION}/apktool_${APKTOOL_VERSION}.jar" \
+    /tmp/apktool.jar
+RUN \
+    mkdir -p "${REA_TOOLS}/apktool" \
+    && mv /tmp/apktool.jar "${REA_TOOLS}/apktool/apktool.jar" \
+    && chmod 0755 "${REA_TOOLS}/apktool/apktool.jar" \
+    && printf '#!/bin/bash\njava -jar "%s/apktool/apktool.jar" "$@"\nexit $?\n' "${REA_TOOLS}" >"${REA_TOOLS}/apktool/apktool" \
+    && chmod 0755 "${REA_TOOLS}/apktool/apktool"
+ENV REA_APKTOOL_COMMAND="${REA_TOOLS}/apktool/apktool"
+
+# binwalk (for reverse engineering)
+ARG BINWALK_VERSION=2.1.0
+RUN --mount=type=cache,target=/root/.cache/pip \
+    "${REA_TOOLS}/venv/bin/python" -m pip install "binwalk==${BINWALK_VERSION}"
+ENV REA_BINWALK_COMMAND="${REA_TOOLS}/venv/bin/unblob"
+
+# unblob (for reverse engineering)
+ARG UNBLOB_VERSION=26.6.4
+RUN --mount=type=cache,target=/root/.cache/pip \
+    "${REA_TOOLS}/venv/bin/python" -m pip install "unblob==${UNBLOB_VERSION}"
+ENV REA_UNBLOB_COMMAND="${REA_TOOLS}/venv/bin/unblob"
 
 RUN fc-cache -fv
 
@@ -73,12 +132,10 @@ FROM setup AS install
 RUN mkdir -p /app/source
 RUN mkdir -p /app/workdir
 
+# DSH
 RUN --mount=type=cache,target=/root/.npm \
     npm install --global \
     @deepseek-ai/dsh@0.2.1-rc.2 \
-    bun@1.4.3 \
-    pinchtab@0.15.2 \
-    rea-agents@6.7.0 \
     && true
 
 # Config
