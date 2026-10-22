@@ -20,9 +20,9 @@ services:
     deploy:
       resources:
         limits:
-          pids: 512
-          cpus: 2
-          memory: 4G
+          pids: 768
+          cpus: 3
+          memory: 6G
     networks:
       - ai_net
     dns:
