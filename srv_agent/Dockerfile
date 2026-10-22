@@ -7,13 +7,13 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get update && apt-get install -y \
     fonts-noto-cjk fonts-noto-color-emoji \
-    && true
+    && rm -rf /var/lib/apt/lists/*
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get update && apt-get install --no-install-recommends -y \
     chromium \
-    && true
+    && rm -rf /var/lib/apt/lists/*
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
@@ -22,13 +22,13 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     curl dnsutils \
     socat ripgrep bubblewrap \
     git git-lfs \
-    && true
+    && rm -rf /var/lib/apt/lists/*
 
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get update && apt-get install --no-install-recommends -y \
     wget apt-transport-https gnupg unzip \
-    && true
+    && rm -rf /var/lib/apt/lists/*
     
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
@@ -38,7 +38,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     python3-venv \
     nano \
     libmagic-dev \
-    && true
+    && rm -rf /var/lib/apt/lists/*
 
 # JDK21
 ADD "https://packages.adoptium.net/artifactory/api/gpg/key/public" /tmp/adoptium_key
@@ -47,10 +47,10 @@ RUN cat /tmp/adoptium_key | gpg --dearmor -o /etc/apt/trusted.gpg.d/adoptium.gpg
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get update && \
-    apt-get install --no-install-recommends -y temurin-21-jdk
+    apt-get install --no-install-recommends -y temurin-21-jdk && \
+    rm -rf /var/lib/apt/lists/*
 
-# Prevent any apt installation after this point
-RUN rm -rf /var/lib/apt/lists/*
+# ======== apt install ends ========
 
 # Note: DSH needs pnpm
 RUN --mount=type=cache,target=/root/.npm \
