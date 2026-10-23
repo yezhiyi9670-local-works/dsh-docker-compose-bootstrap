@@ -67,6 +67,7 @@ services:
       - "[::1]:${PINCHTAB_EXPOSE_PORT:-3082}:82"
     volumes:
       - ./srv_inbounds/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./srv_inbounds/bad_gateway.conf:/etc/nginx/bad_gateway.conf:ro
     networks:
       - ai_net
       - external_net
