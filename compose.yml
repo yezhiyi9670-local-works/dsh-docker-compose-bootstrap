@@ -46,7 +46,7 @@ services:
     env_file:
       - ./srv_agent/.env
     environment:
-      - DSH_EXTRA_ARGS=${DSH_EXTRA_ARGS}
+      - DSH_EXTRA_ARGS=${DSH_EXTRA_ARGS:-}
       - HTTP_PROXY=http://srv_outbounds:3128
       - http_proxy=http://srv_outbounds:3128
       - HTTPS_PROXY=http://srv_outbounds:3128
@@ -61,10 +61,10 @@ services:
     restart: unless-stopped
     image: nginx:1.31.6-alpine3.24-slim
     ports:
-      - "127.0.0.1:3080:80"
-      - "[::1]:3080:80"
-      - "127.0.0.1:3082:82"
-      - "[::1]:3082:82"
+      - "127.0.0.1:${DSH_EXPOSE_PORT:-3080}:80"
+      - "[::1]:${DSH_EXPOSE_PORT:-3080}:80"
+      - "127.0.0.1:${PINCHTAB_EXPOSE_PORT:-3082}:82"
+      - "[::1]:${PINCHTAB_EXPOSE_PORT:-3082}:82"
     volumes:
       - ./srv_inbounds/nginx.conf:/etc/nginx/nginx.conf:ro
     networks:
