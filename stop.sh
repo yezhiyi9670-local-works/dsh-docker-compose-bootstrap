@@ -1,4 +1,4 @@
 #!/bin/bash
 set -eu -o pipefail
-echo "{}" >srv_agent/derived/workspace_binds.yml && echo "Emptied generated workspace_binds.yml."
+python mounthouse/scripts/main.py clear && echo "Emptied generated MountHouse mounts.yml."
 docker compose down --remove-orphans

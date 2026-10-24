@@ -1,4 +1,6 @@
 /.env
+
+# Deprecated and removed: Use the new MountHouse DSL to define workspaces.
 /derived/*
 !/derived/.placeholder
 /priv-workspace_dirs.js

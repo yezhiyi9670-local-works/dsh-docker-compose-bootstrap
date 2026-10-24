@@ -1,5 +1,6 @@
 include:
-  - ./srv_agent/derived/workspace_binds.yml
+  # Source the generated MountHouse mounts.
+  - ./mounthouse/dist/mounts.yml
 
 services:
 
@@ -33,13 +34,8 @@ services:
     depends_on:
       - srv_outbounds
       - srv_dns
-    volumes:
-      # Data directories (ensure owner 1000 in WSL docker-desktop distro)
-      - ./persist/srv_agent/.dsh:/home/node/.dsh:rw
-      - ./persist/srv_agent/.pinchtab:/home/node/.pinchtab:rw
-      - ./persist/srv_agent/.config:/home/node/.config:rw
-      - ./persist/srv_agent/.local:/home/node/.local:rw
-      - ./persist/srv_agent/.cache:/home/node/.cache:rw
+    # All mounts into srv_agent are now defined in MountHouse DSL. See `mounthouse/`.
+    volumes: []
     tmpfs:
       - /tmp:noexec,nosuid,size=1G
       - /usr/local/lib/node_modules/.cache:nosuid,size=500M

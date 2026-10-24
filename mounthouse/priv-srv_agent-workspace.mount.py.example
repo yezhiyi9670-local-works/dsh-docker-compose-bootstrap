@@ -1,0 +1,62 @@
+import os
+
+from api import API
+from .utils import conventional_config, setup_conventional_ws, use_wsl_host_mount
+
+HOME0 = r'C:\Users\Administrator'
+AGENT_GENERAL = rf'{HOME0}/agent_general'
+CONVENTIONAL_SHARED_DOCS = rf'{AGENT_GENERAL}/shared_docs'
+CONVENTIONAL_SHARED_TEMP = rf'{HOME0}/agent_temp/shared_temp'
+
+WS_PARENT = '/home/node/workspaces'
+
+def define_mounts(api: API):
+    with api.config(service='srv_agent', src=AGENT_GENERAL, dst=WS_PARENT):
+        with conventional_config(
+            shared_docs=CONVENTIONAL_SHARED_DOCS,
+            shared_temp=CONVENTIONAL_SHARED_TEMP,
+            docs_writable=True
+        ):
+            actual_job(api)
+
+def actual_job(api: API):
+    with api.config(dst='general', src=AGENT_GENERAL):
+        setup_conventional_ws(api)
+        
+        api.ro_bind(both='workflow')
+        workflow_host_dir = api.get_src_path(src='workflow')
+        assert workflow_host_dir != None
+        for workflow in os.listdir(workflow_host_dir):
+            if not os.path.exists(os.path.join(workflow_host_dir, workflow, 'prompt')):
+                continue
+            print(f'general/workflow: Found subfolder "{workflow}"')
+            api.rw_bind(both=f'workflow/{workflow}')
+            api.ro_bind(both=f'workflow/{workflow}/prompt')
+
+    with api.config(
+        dst='another-workspace',
+        src=rf'{HOME0}/path/to/AnotherWorkspace'
+    ):
+        # Example of adding a workspace on host
+        setup_conventional_ws(api)
+        api.rw_bind_ro_git(both='project1')
+        api.rw_bind_ro_git(both='project2')
+
+    with api.config(dst='aosp-builds'):
+        # Example of adding a workspace inside a WSL-native external vhdx mount
+        setup_conventional_ws(api)
+        with use_wsl_host_mount(api):
+            with api.config(src='aosp-builds'):  # Name of in-WSL mount point
+                # Observe a non-mountpoint but expexted-to-exist path,
+                # since Docker Desktop quirks might sometimes auto-create mountpoint paths.
+                if not api.src_exists(src='lineageos/build'):
+                    print(
+                        'aosp-builds/lineageos: Drive not observed. '
+                        'Mounting as ro tmpfs to indicate absence.'
+                    )
+                    api.ro_tmpfs(dst='lineageos')
+                else:
+                    print('aosp-builds/lineageos: Drive observed.')
+                    api.rw_bind(both='lineageos')
+                    api.ro_bind(both='lineageos/.repo')
+                    api.ro_bind(both='lineageos/_reference_apps')

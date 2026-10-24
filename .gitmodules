@@ -1,0 +1,3 @@
+[submodule "mounthouse/scripts"]
+	path = mounthouse/scripts
+	url = https://github.com/yezhiyi9670-local-works/compose-mounthouse-scripts
