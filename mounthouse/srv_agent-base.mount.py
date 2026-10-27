@@ -4,7 +4,7 @@ from api import API
 from .utils import use_mounthouse_perf
 
 def define_mounts(api: API):
-    with api.config(service='srv_agent', src='./persist/srv_agent', dst='/home/node'):
+    with api.config(service='srv_agent', src='./persist/srv_agent', dst='/home/node', options={'must_exist': False, 'create': True}):
         mounthouse_prefix = os.getenv('PERSIST_MOUNTHOUSE_PREFIX', '')
         if mounthouse_prefix == '':
             persist_mount_env = api.config()  # no-op context
