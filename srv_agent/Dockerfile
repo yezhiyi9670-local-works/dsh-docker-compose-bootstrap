@@ -179,7 +179,7 @@ FROM postconfig AS start
 CMD [ \
     "sh", "-c", \
     " \
-        dsh --profile web --dump-config; \
+        dsh --profile web --dump-config >/dev/null; \
         \
         socat TCP-LISTEN:3083,fork,reuseaddr TCP4:127.0.0.1:3082 & \
         yes | pinchtab server --bind 127.0.0.1 --port 3082 & \
