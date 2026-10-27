@@ -18,6 +18,11 @@ services:
       - apparmor:unconfined
       - seccomp:unconfined
       - no-new-privileges:true
+      # Prevent SELinux denial without changing host-side context
+      # (which may break host-side workflow)
+      - label:disable
+    # Map host user to this UID, eliminating ownership problems
+    userns_mode: keep-id:uid=1000,gid=1000
     deploy:
       resources:
         limits:
@@ -56,6 +61,8 @@ services:
   srv_inbounds:
     restart: unless-stopped
     image: docker.io/nginx:1.31.6-alpine3.24-slim
+    security_opt:
+      - label:disable
     ports:
       - "127.0.0.1:${DSH_EXPOSE_PORT:-3080}:80"
       - "[::1]:${DSH_EXPOSE_PORT:-3080}:80"
@@ -73,6 +80,8 @@ services:
   srv_outbounds:
     restart: unless-stopped
     image: docker.io/sameersbn/squid:3.5.27-2
+    security_opt:
+      - label:disable
     volumes:
       - ./srv_outbounds/squid.conf:/root/squid.conf:ro
       - ./srv_outbounds/squid-extra:/etc/squid-extra:ro
@@ -91,6 +100,8 @@ services:
     restart: unless-stopped
     image: docker.io/coredns/coredns:1.14.7
     command: ["-conf", "/etc/coredns/Corefile"]
+    security_opt:
+      - label:disable
     volumes:
       - ./srv_dns/Corefile:/etc/coredns/Corefile:ro
     networks:
