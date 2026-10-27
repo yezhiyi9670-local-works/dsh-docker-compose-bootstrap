@@ -5,3 +5,15 @@
 
 # Extra ACL entries
 # acl Host_extra_ports port 1145
+
+# If you are using rootless containers (Podman rootless mode),
+#   containers may not be able to access host-loopback-only (127.0.0.1-bound)
+#   services via host.docker.internal.
+# This can be worked around with the following containers.conf configuration.
+# Note that doing so effectively exposes host-loopback-only services to any
+#   host-connected container.
+#
+# # ~/.config/containers/containers.conf.d/99-pasta-loopback.conf
+# [network]
+# network_backend = "netavark"
+# pasta_options = ["--map-host-loopback=169.254.1.2"]
