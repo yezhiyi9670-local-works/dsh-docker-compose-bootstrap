@@ -40,8 +40,12 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     libmagic-dev \
     && rm -rf /var/lib/apt/lists/*
 
+COPY fetch_artifact.sh /tmp/fetch_artifact.sh
+RUN chmod +x /tmp/fetch_artifact.sh
+
 # JDK21
-ADD "https://packages.adoptium.net/artifactory/api/gpg/key/public" /tmp/adoptium_key
+RUN --mount=type=cache,target=/tmp/artifact-cache,sharing=locked \
+    /tmp/fetch_artifact.sh "https://packages.adoptium.net/artifactory/api/gpg/key/public" /tmp/adoptium_key
 RUN cat /tmp/adoptium_key | gpg --dearmor -o /etc/apt/trusted.gpg.d/adoptium.gpg && \
     echo "deb https://packages.adoptium.net/artifactory/deb bookworm main" > /etc/apt/sources.list.d/adoptium.list
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -67,10 +71,12 @@ RUN python -m venv "${REA_TOOLS}/venv"
 # Ghidra (for reverse engineering)
 ARG GHIDRA_VERSION=12.1.4
 ARG GHIDRA_ZIP=ghidra_12.1.4_PUBLIC_20260921.zip
-ARG GHIDRA_CHECKSUM=sha256:ddac49f903da9d5bac833e5cc79395098b9c33cfd3279be5f31bd00387d2d4db
-ADD --checksum=${GHIDRA_CHECKSUM} \
+ARG GHIDRA_SHA256=ddac49f903da9d5bac833e5cc79395098b9c33cfd3279be5f31bd00387d2d4db
+RUN --mount=type=cache,target=/tmp/artifact-cache,sharing=locked \
+    /tmp/fetch_artifact.sh \
     "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_${GHIDRA_VERSION}_build/${GHIDRA_ZIP}" \
-    /tmp/ghidra.zip
+    /tmp/ghidra.zip \
+    "${GHIDRA_SHA256}"
 RUN \
     unzip -q /tmp/ghidra.zip -d /tmp/ghidra \
     && mv "/tmp/ghidra/ghidra_${GHIDRA_VERSION}_PUBLIC" "${REA_TOOLS}/ghidra" \
@@ -89,10 +95,12 @@ RUN --mount=type=cache,target=/root/.npm \
 
 # JADX (for reverse engineering)
 ARG JADX_MCP_VERSION=0.7.1
-ARG JADX_MCP_CHECKSUM=sha256:6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75
-ADD --checksum=${JADX_MCP_CHECKSUM} \
+ARG JADX_MCP_SHA256=6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75
+RUN --mount=type=cache,target=/tmp/artifact-cache,sharing=locked \
+    /tmp/fetch_artifact.sh \
     "https://github.com/1013503897/jadx-headless-mcp/releases/download/v${JADX_MCP_VERSION}/jadx-headless-mcp-${JADX_MCP_VERSION}-all.jar" \
-    /tmp/jadx-headless-mcp.jar
+    /tmp/jadx-headless-mcp.jar \
+    "${JADX_MCP_SHA256}"
 RUN \
     mkdir -p "${REA_TOOLS}/jadx" \
     && mv /tmp/jadx-headless-mcp.jar "${REA_TOOLS}/jadx/jadx-headless-mcp.jar" \
@@ -101,10 +109,12 @@ ENV REA_JADX_MCP_JAR="${REA_TOOLS}/jadx/jadx-headless-mcp.jar"
 
 # apktool (for reverse engineering)
 ARG APKTOOL_VERSION=3.0.3
-ARG APKTOOL_CHECKSUM=sha256:dbf930b076c6b9be08d57c449cacefc3bdd6b71ebd59b3066fc0e1f5b14f9423
-ADD --checksum=${APKTOOL_CHECKSUM} \
+ARG APKTOOL_SHA256=dbf930b076c6b9be08d57c449cacefc3bdd6b71ebd59b3066fc0e1f5b14f9423
+RUN --mount=type=cache,target=/tmp/artifact-cache,sharing=locked \
+    /tmp/fetch_artifact.sh \
     "https://github.com/iBotPeaches/Apktool/releases/download/v${APKTOOL_VERSION}/apktool_${APKTOOL_VERSION}.jar" \
-    /tmp/apktool.jar
+    /tmp/apktool.jar \
+    "${APKTOOL_SHA256}"
 RUN \
     mkdir -p "${REA_TOOLS}/apktool" \
     && mv /tmp/apktool.jar "${REA_TOOLS}/apktool/apktool.jar" \
