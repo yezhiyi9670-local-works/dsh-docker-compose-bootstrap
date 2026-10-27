@@ -6,4 +6,4 @@ else
     echo "Failed to generate MountHouse mounts.yml. Will not continue." >&2
     exit "$?"
 fi
-docker compose up -d --remove-orphans
+CONTAINERS_CONF_OVERRIDE=./containers.conf docker compose up -d --remove-orphans

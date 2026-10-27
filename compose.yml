@@ -89,6 +89,9 @@ services:
     tmpfs:
       - /etc/squid:noexec,nosuid,size=1M
     command: ["sh", "/root/entrypoint.sh"]
+    extra_hosts:
+      # This is the mapped host loopback IP in containers.conf
+      - "host.docker.internal:169.254.1.2"
     networks:
       ai_net:
         # Fixed address so pinchtab can be accurately configured to trust this proxy address.
