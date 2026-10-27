@@ -1,2 +1,4 @@
 .env
 /persist
+/agent_general
+/agent_temp
