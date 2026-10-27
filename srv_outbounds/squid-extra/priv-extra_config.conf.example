@@ -12,6 +12,8 @@
 # This can be worked around with the following containers.conf configuration.
 # Note that doing so effectively exposes host-loopback-only services to any
 #   host-connected container.
+# 169.254.1.2 is the IP which host.docker.internal resolves to. It's hardcoded
+#   and safe to assume in the current pasta implementation.
 #
 # # ~/.config/containers/containers.conf.d/99-pasta-loopback.conf
 # [network]
