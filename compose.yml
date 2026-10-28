@@ -31,16 +31,12 @@ services:
           memory: 6G
     networks:
       - ai_net
-    dns:
-      # PinchTab's navigation preflight resolves hostnames itself; ai_net is
-      # internal, so point it at the forwarding resolver on ai_net.
-      - 172.16.0.53
-      - fd00:1:2:3::53
     depends_on:
       - srv_outbounds
       - srv_dns
-    # All mounts into srv_agent are now defined in MountHouse DSL. See `mounthouse/`.
-    volumes: []
+    # All persist and workspace mounts into srv_agent are now defined in MountHouse DSL. See `mounthouse/`.
+    volumes:
+      - ./srv_agent/resolv.conf:/etc/resolv.conf:ro
     tmpfs:
       - /tmp:noexec,nosuid,size=1G
       - /usr/local/lib/node_modules/.cache:nosuid,size=500M
@@ -92,8 +88,8 @@ services:
     networks:
       ai_net:
         # Fixed address so pinchtab can be accurately configured to trust this proxy address.
-        ipv4_address: 172.16.0.80
-        ipv6_address: fd00:1:2:3::80
+        ipv4_address: 172.30.80.80
+        ipv6_address: fd00:9:30:80::80
       external_net: {}
 
   srv_dns:
@@ -108,8 +104,8 @@ services:
       ai_net:
         # Fixed address so srv_agent can name it in `dns:` (Docker's dns
         # option takes an address, not a service name).
-        ipv4_address: 172.16.0.53
-        ipv6_address: fd00:1:2:3::53
+        ipv4_address: 172.30.80.53
+        ipv6_address: fd00:9:30:80::53
       external_net: {}
 
 networks:
@@ -120,8 +116,10 @@ networks:
     ipam:
       config:
         # Pinned so srv_dns gets a predictable address on the internal net.
-        - subnet: 172.16.0.0/24
-        - subnet: fd00:1:2:3::/64
+        - subnet: 172.30.80.0/24
+          gateway: 172.30.80.1
+        - subnet: fd00:9:30:80::/64
+          gateway: fd00:9:30:80::1
   external_net:
     # Default bridge - proxy can reach the internet
     driver: 'bridge'

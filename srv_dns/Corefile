@@ -21,7 +21,7 @@
         fallthrough
     }
 
-    forward . 1.1.1.1 8.8.8.8 /etc/resolv.conf {
+    forward . 172.30.80.1 1.1.1.1 8.8.8.8 /etc/resolv.conf {
         # 'sequential' ensures it tries the first upstream, and only moves to 
         # the next one if the first one times out or fails to connect.
         policy sequential
