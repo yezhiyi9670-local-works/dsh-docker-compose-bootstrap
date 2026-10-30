@@ -1,7 +1,3 @@
-include:
-  # Source the generated MountHouse mounts.
-  - ./mounthouse/dist/mounts.yml
-
 services:
 
   srv_agent:

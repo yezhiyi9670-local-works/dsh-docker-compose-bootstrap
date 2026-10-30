@@ -6,4 +6,4 @@ else
     echo "Failed to generate MountHouse mounts.yml. Will not continue." >&2
     exit "$?"
 fi
-docker compose up -d
+docker compose -f compose.yml -f ./mounthouse/dist/mounts.yml up -d
