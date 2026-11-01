@@ -27,9 +27,6 @@ services:
           memory: 6G
     networks:
       - ai_net
-    depends_on:
-      - srv_outbounds
-      - srv_dns
     # All persist and workspace mounts into srv_agent are now defined in MountHouse DSL. See `mounthouse/`.
     volumes:
       - ./srv_agent/resolv.conf:/etc/resolv.conf:ro
@@ -66,8 +63,6 @@ services:
     networks:
       - ai_net
       - external_net
-    depends_on:
-      - srv_agent
 
   srv_outbounds:
     restart: unless-stopped
