@@ -153,7 +153,7 @@ RUN mkdir -p /app/workdir
 # DSH
 RUN --mount=type=cache,target=/root/.npm \
     npm install --global \
-    @deepseek-ai/dsh@0.2.1-rc.5 \
+    @deepseek-ai/dsh@0.2.1-rc.2 \
     && true
 
 # Config
