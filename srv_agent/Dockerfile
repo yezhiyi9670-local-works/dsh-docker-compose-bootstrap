@@ -1,5 +1,5 @@
 
-FROM docker.io/node:22-bookworm-slim AS base
+FROM docker.io/node:24-bookworm-slim AS base
 
 FROM base AS setup
 
@@ -153,7 +153,7 @@ RUN mkdir -p /app/workdir
 # DSH
 RUN --mount=type=cache,target=/root/.npm \
     npm install --global \
-    @deepseek-ai/dsh@0.2.1-rc.2 \
+    @deepseek-ai/dsh@0.2.2-rc.1 \
     && true
 
 # Config
