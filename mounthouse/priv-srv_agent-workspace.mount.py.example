@@ -1,5 +1,3 @@
-import os
-
 from api import API
 from .utils import conventional_config, setup_conventional_ws, use_wsl_host_mount
 
@@ -24,10 +22,8 @@ def actual_job(api: API):
         setup_conventional_ws(api)
         
         api.ro_bind(both='workflow')
-        workflow_host_dir = api.get_src_path(src='workflow')
-        assert workflow_host_dir != None
-        for workflow in os.listdir(workflow_host_dir):
-            if not os.path.exists(os.path.join(workflow_host_dir, workflow, 'prompt')):
+        for workflow in api.src_listdir(src='workflow'):
+            if not api.src_exists(src=f'workflow/{workflow}/prompt'):
                 continue
             print(f'general/workflow: Found subfolder "{workflow}"')
             api.rw_bind(both=f'workflow/{workflow}')
