@@ -1,2 +1,2 @@
 #!/bin/bash
-./stop.sh && ./start.sh
+./stop.sh && ./start.sh "$@"
