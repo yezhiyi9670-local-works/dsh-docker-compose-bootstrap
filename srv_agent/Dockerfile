@@ -138,7 +138,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 ENV REA_BINWALK_COMMAND="${REA_TOOLS}/venv/bin/unblob"
 
 # unblob (for reverse engineering)
-ARG UNBLOB_VERSION=26.6.4
+ARG UNBLOB_VERSION=26.3.30
 RUN --mount=type=cache,target=/root/.cache/pip \
     "${REA_TOOLS}/venv/bin/python" -m pip install "unblob==${UNBLOB_VERSION}"
 ENV REA_UNBLOB_COMMAND="${REA_TOOLS}/venv/bin/unblob"
